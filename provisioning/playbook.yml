@@ -60,6 +60,10 @@
     - include: tasks/build-makefile.yml
       when: build_makefile
 
+    # Build drupal-project with composer.
+    - include: tasks/build-composer.yml
+      when: build_composer
+
     # Install site if configured.
     - include: tasks/install-site.yml
       when: install_site

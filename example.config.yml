@@ -38,6 +38,11 @@ drupalvm_webserver: apache
 build_makefile: true
 drush_makefile_path: /vagrant/drupal.make.yml
 
+# Set this to true if you are using composer to build and track Drupal versions
+# and contrib projects
+build_composer: false
+drupal_composer_json_path: /var/www/drupalvm/web
+
 # Set this to false if you don't need to install drupal (using the drupal_*
 # settings below), but instead copy down a database (e.g. using drush sql-sync).
 install_site: true

@@ -1,0 +1,5 @@
+---
+- name: Generate Drupal site with composer.
+  command: >
+    composer install -d={{ drupal_composer_json_path }}
+  sudo: no
