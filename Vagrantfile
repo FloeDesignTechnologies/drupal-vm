@@ -120,6 +120,22 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     p.cpus = vconfig['vagrant_cpus']
   end
 
+  # LXC.
+  config.vm.provider :lxc do |lxc, override|
+    override.vm.box = vconfig['vagrant_box'].has_key?('lxc') ? vconfig['vagrant_box']['lxc'] : vconfig['vagrant_box']['default']
+    lxc.customize 'network.ipv4', "#{vconfig['vagrant_ip']}/32"
+    # Override shared folders to force type to "native", and ensure the 'bind' mount options.
+    for synced_folder in vconfig['vagrant_synced_folders'];
+      override.vm.synced_folder synced_folder['local_path'], synced_folder['destination'],
+        type: '',
+        id: synced_folder['id'],
+        create: synced_folder.include?('create') ? synced_folder['create'] : false,
+        mount_options: [synced_folder.include?('mount_options') ? synced_folder['mount_options'] : [], 'bind'].flatten()
+    end
+
+  end
+
+
   # Set the name of the VM. See: http://stackoverflow.com/a/17864388/100134
   config.vm.define vconfig['vagrant_machine_name'] do |d|
   end
