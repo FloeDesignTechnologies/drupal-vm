@@ -21,6 +21,12 @@ if !File.exist?("#{dir}/config.yml")
   raise 'Configuration file not found! Please copy example.config.yml to config.yml and try again.'
 end
 vconfig = YAML::load_file("#{dir}/config.yml")
+if !vconfig['vagrant_box'].is_a? Hash
+  vconfig['vagrant_box'] = {
+    default: vconfig['vagrant_box']
+  }
+end
+
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.hostname = vconfig['vagrant_hostname']
@@ -39,7 +45,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.ssh.insert_key = false
   config.ssh.forward_agent = true
 
-  config.vm.box = vconfig['vagrant_box']
+  config.vm.box = vconfig['vagrant_box']['default']
 
   # If hostsupdater plugin is installed, add all server names as aliases.
   if Vagrant.has_plugin?("vagrant-hostsupdater")
@@ -87,6 +93,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # VMware Fusion.
   config.vm.provider :vmware_fusion do |v, override|
+    override.vm.box = vconfig['vagrant_box'].has_key?('vmware_fusion') ? vconfig['vagrant_box']['vmware_fusion'] : vconfig['vagrant_box']['default']
     # HGFS kernel module currently doesn't load correctly for native shares.
     override.vm.synced_folder ".", "/vagrant", type: 'nfs'
 
@@ -96,7 +103,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   # VirtualBox.
-  config.vm.provider :virtualbox do |v|
+  config.vm.provider :virtualbox do |v, override|
+    override.vm.box = vconfig['vagrant_box'].has_key?('virtualbox') ? vconfig['vagrant_box']['virtualbox'] : vconfig['vagrant_box']['default']
     v.name = vconfig['vagrant_hostname']
     v.memory = vconfig['vagrant_memory']
     v.cpus = vconfig['vagrant_cpus']
@@ -106,7 +114,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Parallels.
   config.vm.provider :parallels do |p, override|
-    override.vm.box = vconfig['vagrant_box']
+    override.vm.box = vconfig['vagrant_box'].has_key?('parallels') ? vconfig['vagrant_box']['parallels'] : vconfig['vagrant_box']['default']
     p.name = vconfig['vagrant_hostname']
     p.memory = vconfig['vagrant_memory']
     p.cpus = vconfig['vagrant_cpus']
